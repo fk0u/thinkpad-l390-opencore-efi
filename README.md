@@ -6,25 +6,38 @@
 
 | Item | Ventura (`main`) | Sequoia (branch ini) |
 |---|---|---|
-| `AirportItlwm.kext` | aktif (build Ventura 2.3.0, dibatasi kernel 22.x) | **dinonaktifkan** |
+| `AirportItlwm.kext` | build Ventura 2.3.0, kernel 22.x | **build Sequoia dari fork `laobamac/itlwm`**, kernel 24.2.0 - 24.99.99 (Sequoia 15.2+) |
 | Lainnya | | identik |
 
-### Kenapa Wi-Fi dimatikan
-`AirportItlwm` yang ada adalah build **Ventura saja**. Rilis stabil resmi OpenIntelWireless/itlwm hanya menyediakan build sampai Sonoma 14.4; dukungan macOS 15 masih berupa permintaan terbuka ([itlwm#1009](https://github.com/OpenIntelWireless/itlwm/issues/1009)). Di Sequoia kext ini tidak akan load. Jalur komunitas yang beredar (tidak resmi, belum dipakai di repo ini):
-- fork pihak ketiga `laobamac/itlwm` (build Sequoia, status alpha), atau
-- `AirportItlwm 2.3.0` Ventura + OCLP Modern Wi-Fi root patch + spoof IOName Broadcom (butuh root patch, bukan EFI-only).
+### Wi-Fi: AirportItlwm untuk Sequoia (build sendiri)
+Rilis stabil resmi OpenIntelWireless/itlwm berhenti di Sonoma 14.4 ([itlwm#1009](https://github.com/OpenIntelWireless/itlwm/issues/1009)). Kext di sini dibangun dari source fork pihak ketiga `laobamac/itlwm` (alpha), bukan memakai binary rilisnya.
 
-Selama Wi-Fi belum beres, internet lewat **Ethernet** (IntelMausiEthernet, I219-V) atau adapter USB.
+| Item | Nilai |
+|---|---|
+| Source | `laobamac/itlwm` commit `7204c69` (tag `v2.4.0-alpha`) |
+| MacKernelSDK | `acidanthera/MacKernelSDK` commit `3f75008` |
+| Toolchain | Xcode 15.2, `xcodebuild -scheme AirportItlwm-Sequoia -configuration Release ARCHS=x86_64 CODE_SIGNING_ALLOWED=NO` |
+| SHA-256 binary | `843975fd5ebda2ed1b8e97961d5853214c994b1a91ed17a82302bcea578aa383` |
+| Versi | 2.4.0 |
+
+**Pemeriksaan sebelum build:** tidak ada URL/IP hardcode di source driver, tidak ada hook kernel di luar fungsi Wi-Fi (hanya `ItlNetworkUserClient` bawaan upstream), build-phase Xcode hanya mengompres firmware dengan zlib, dan binary hasil build berukuran setara dengan binary rilis fork (15.9 MB vs 15.9 MB, tanpa string jaringan).
+
+**Penyesuaian untuk mesin ini:**
+1. `IOPCIMatch` dipersempit dari ~100 ID menjadi hanya `0x9df08086` (Intel Wireless-AC 9560 CNVW di L390). Kalau Wi-Fi-mu berbeda, kembalikan atau ganti ID-nya.
+2. Di `config.plist`, kernel dibatasi `24.2.0` - `24.99.99` (README fork: Sequoia 15.2 ke atas). Sequoia 15.0/15.1 tidak didukung.
+3. Wi-Fi 6 (HE) tetap mati secara default (opt-in `itlwm_he=1`). Tidak relevan untuk 9560.
+
+**Keterbatasan (dari README fork):** WPA3-only, PMF wajib, AWDL/AirDrop, dan MLO tidak didukung. Fork mengklaim sudah diuji di 15.8 (24H23); **belum diuji di mesin ini**.
 
 ### Cek kompatibilitas yang sudah dilakukan (statis, bukan boot)
 - OpenCore **1.0.8** adalah rilis stabil terbaru dan mendukung macOS 15.
-- Semua kext selain Wi-Fi sudah di versi sama atau lebih baru dari rilis terbaru upstream (Lilu 1.7.3, VirtualSMC/WhateverGreen/AppleALC terbaru, NVMeFix 1.1.4, VoodooPS2 2.3.8, BlueToolFixup 2.7.3, IntelBluetoothFirmware/BTPatcher 2.5.0).
+- Semua kext selain AirportItlwm sudah di versi sama atau lebih baru dari rilis terbaru upstream (Lilu 1.7.3, VirtualSMC/WhateverGreen/AppleALC terbaru, NVMeFix 1.1.4, VoodooPS2 2.3.8, BlueToolFixup 2.7.3, IntelBluetoothFirmware/BTPatcher 2.5.0).
 - Tidak ada kext aktif yang dibatasi `MaxKernel` di bawah 24 (Sequoia = Darwin 24.x).
 - Semua kext, SSDT, dan driver yang diaktifkan di `config.plist` ada di disk.
 - `MacBookPro15,2` masih didukung Sequoia.
 
 ### Belum diverifikasi
-`ocvalidate`, boot nyata, sleep, audio, touchpad (VoodooI2C/PS2), Bluetooth (BlueToolFixup), card reader (Sinetek-rtsx v9.0 dari 2021), dan YogaSMC (1.5.3 dari 2022) di Sequoia. Dua yang terakhir adalah kandidat paling mungkin bermasalah karena lama tidak diperbarui.
+`ocvalidate`, boot nyata, Wi-Fi AirportItlwm di mesin ini, sleep, audio, touchpad (VoodooI2C/PS2), Bluetooth (BlueToolFixup), card reader (Sinetek-rtsx v9.0 dari 2021), dan YogaSMC (1.5.3 dari 2022) di Sequoia. Dua yang terakhir adalah kandidat paling mungkin bermasalah karena lama tidak diperbarui.
 
 **Sebelum install:** simpan EFI Ventura yang jalan dan siapkan USB installer. Isi SMBIOS sendiri.
 

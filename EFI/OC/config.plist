@@ -431,15 +431,15 @@
 				<key>BundlePath</key>
 				<string>AirportItlwm.kext</string>
 				<key>Comment</key>
-				<string>DISABLED on Sequoia: this is the Ventura-only 2.3.0 build (kernel 22.x). No stable AirportItlwm for macOS 15 exists, see README.</string>
+				<string>Sequoia 15.2+ only. Built from laobamac/itlwm 7204c69 (Xcode 15.2), IOPCIMatch limited to 8086:9DF0 (Intel 9560 CNVW). See README.</string>
 				<key>Enabled</key>
-				<false/>
+				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AirportItlwm</string>
 				<key>MaxKernel</key>
-				<string>22.99.99</string>
+				<string>24.99.99</string>
 				<key>MinKernel</key>
-				<string>22.0.0</string>
+				<string>24.2.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 			</dict>
