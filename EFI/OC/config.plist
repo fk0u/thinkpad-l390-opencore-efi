@@ -431,9 +431,9 @@
 				<key>BundlePath</key>
 				<string>AirportItlwm.kext</string>
 				<key>Comment</key>
-				<string>V2.3.0</string>
+				<string>DISABLED on Sequoia: this is the Ventura-only 2.3.0 build (kernel 22.x). No stable AirportItlwm for macOS 15 exists, see README.</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AirportItlwm</string>
 				<key>MaxKernel</key>

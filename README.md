@@ -1,4 +1,34 @@
-# ThinkPad L390 – OpenCore EFI (macOS Ventura)
+# ThinkPad L390 – OpenCore EFI (branch `sequoia`: macOS Sequoia 15.x)
+
+> **Status: BELUM DIUJI BOOT.** Branch ini diturunkan dari EFI Ventura 13.7.8 yang terbukti jalan (branch `main`). Tidak ada rilis Sequoia yang diinstall di mesin saat penyusunan, jadi anggap ini *kandidat*, bukan EFI yang sudah terbukti.
+
+## Beda dari `main` (Ventura)
+
+| Item | Ventura (`main`) | Sequoia (branch ini) |
+|---|---|---|
+| `AirportItlwm.kext` | aktif (build Ventura 2.3.0, dibatasi kernel 22.x) | **dinonaktifkan** |
+| Lainnya | | identik |
+
+### Kenapa Wi-Fi dimatikan
+`AirportItlwm` yang ada adalah build **Ventura saja**. Rilis stabil resmi OpenIntelWireless/itlwm hanya menyediakan build sampai Sonoma 14.4; dukungan macOS 15 masih berupa permintaan terbuka ([itlwm#1009](https://github.com/OpenIntelWireless/itlwm/issues/1009)). Di Sequoia kext ini tidak akan load. Jalur komunitas yang beredar (tidak resmi, belum dipakai di repo ini):
+- fork pihak ketiga `laobamac/itlwm` (build Sequoia, status alpha), atau
+- `AirportItlwm 2.3.0` Ventura + OCLP Modern Wi-Fi root patch + spoof IOName Broadcom (butuh root patch, bukan EFI-only).
+
+Selama Wi-Fi belum beres, internet lewat **Ethernet** (IntelMausiEthernet, I219-V) atau adapter USB.
+
+### Cek kompatibilitas yang sudah dilakukan (statis, bukan boot)
+- OpenCore **1.0.8** adalah rilis stabil terbaru dan mendukung macOS 15.
+- Semua kext selain Wi-Fi sudah di versi sama atau lebih baru dari rilis terbaru upstream (Lilu 1.7.3, VirtualSMC/WhateverGreen/AppleALC terbaru, NVMeFix 1.1.4, VoodooPS2 2.3.8, BlueToolFixup 2.7.3, IntelBluetoothFirmware/BTPatcher 2.5.0).
+- Tidak ada kext aktif yang dibatasi `MaxKernel` di bawah 24 (Sequoia = Darwin 24.x).
+- Semua kext, SSDT, dan driver yang diaktifkan di `config.plist` ada di disk.
+- `MacBookPro15,2` masih didukung Sequoia.
+
+### Belum diverifikasi
+`ocvalidate`, boot nyata, sleep, audio, touchpad (VoodooI2C/PS2), Bluetooth (BlueToolFixup), card reader (Sinetek-rtsx v9.0 dari 2021), dan YogaSMC (1.5.3 dari 2022) di Sequoia. Dua yang terakhir adalah kandidat paling mungkin bermasalah karena lama tidak diperbarui.
+
+**Sebelum install:** simpan EFI Ventura yang jalan dan siapkan USB installer. Isi SMBIOS sendiri.
+
+---
 
 EFI OpenCore untuk Hackintosh **Lenovo ThinkPad L390**, berjalan di **macOS Ventura 13.7.8 (22H730)**.
 
